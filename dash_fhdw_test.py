@@ -56,7 +56,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
 
 
 def start_app():
-    app.run_server(debug=True)
+    app.run_server(host='0.0.0.0', port=5000)
 
 if __name__ == '__main__':
     start_app()
