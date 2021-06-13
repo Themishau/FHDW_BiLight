@@ -14,11 +14,13 @@ colors = {
 
 # Import der Daten
 
-df_bees = pd.read_csv("ExampleData/intro_bees.csv")
 
-df_bees = df_bees.groupby(['State', 'ANSI', 'Affected by', 'Year', 'state_code'])[['Pct of Colonies Impacted']].mean()
-df_bees.reset_index(inplace=True)
-print(df_bees[:5])
+
+# df_bees = pd.read_csv("ExampleData/intro_bees.csv")
+#
+# df_bees = df_bees.groupby(['State', 'ANSI', 'Affected by', 'Year', 'state_code'])[['Pct of Colonies Impacted']].mean()
+# df_bees.reset_index(inplace=True)
+# print(df_bees[:5])
 
 # ------------------------------------------------------------------------------
 # App layout
@@ -56,7 +58,7 @@ def update_graph(option_slctd):
     print(option_slctd)
     print(type(option_slctd))
 
-    container = "The year chosen by user was: {}".format(option_slctd)
+    container = "Ausgewählter Tag: {}".format(option_slctd)
 
     dff = df_bees.copy()
     dff = dff[dff["Year"] == option_slctd]
