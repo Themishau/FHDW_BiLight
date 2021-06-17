@@ -136,7 +136,6 @@ class SQL_Writer():
 
     def add_dummy_data_to_bi_light(self):
 
-
         cursor = self.db_connection.cursor()
         qr_codes = self.get_df_select_qr_code()
         # sql = "SELECT * FROM `geschaeft_benefit`"
@@ -344,7 +343,7 @@ class SQL_Writer():
 
 
     def create_connection_pymysql(self):
-        connection = pymysql.connect(host='localhost',    # change host-ip if needed
+        connection = pymysql.connect(host='localhost',    # change to themishaurheinberg.duckdns.org
                                      port=3310,           # change port if needed
                                      user='dummy_insert',
                                      password='1234',

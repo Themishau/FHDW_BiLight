@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-
-# Run this app with `python app.py` and
-# visit http://127.0.0.1:8050/ in your web browser.
 import os
 import pathlib
 import numpy as np
@@ -15,7 +12,6 @@ from dash.dependencies import Input, Output, State
 import pandas as pd
 from plot_data import BI_Data
 
-# external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 GRAPH_INTERVAL = os.environ.get("GRAPH_INTERVAL", 15000)
 app = dash.Dash(
     __name__,
@@ -30,17 +26,7 @@ colors = {
     'text': '#7FDBFF'
 }
 
-# assume you have a "long-form" data frame
-# see https://plotly.com/python/px-arguments/ for more options
-
 data = BI_Data()
-
-# data = pd.DataFrame({
-#     "Fruit": ["Apples", "Oranges", "Bananas", "Apples", "Oranges", "Bananas"],
-#     "Amount": [4, 1, 2, 2, 4, 5],
-#     "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
-# })
-
 
 # ------------------------------------------------------------------------------
 # App layout
@@ -234,33 +220,46 @@ def generate_qr_code_graph(interval):
     :param interval: update the graph based on an interval
     :return:
     """
+
     data.refresh_data()
-    data.qr_code_df['hour'] = data.qr_code_df['Timestamp'].dt.hour
-    data.qr_code_df['day'] = data.qr_code_df['Timestamp'].dt.day
-    data.qr_code_df['month'] = data.qr_code_df['Timestamp'].dt.month
-    df_count = data.qr_code_df.groupby(['hour']).size().reset_index(name='counts')
+
+    # korrekte umsetzung
+    data.qr_code_pro_stunde_heute()
+    df_count = data.qr_code_pro_stunde_h
+
+    # data.qr_code_df['hour'] = data.qr_code_df['Timestamp'].dt.hour
+    # data.qr_code_df['day'] = data.qr_code_df['Timestamp'].dt.day
+    # data.qr_code_df['month'] = data.qr_code_df['Timestamp'].dt.month
+    # df_count = data.qr_code_df.groupby(['hour']).size().reset_index(name='counts')
     print(df_count)
-    now = dt.datetime.now()
+
     trace = dict(
         type="bar",
+        mode='bar',
+        text=df_count['counts'],
+        textposition='inside',
         x=df_count['hour'],
         y=df_count['counts'],
+        colors='#ffffff',
         line={"color": "#E2A012"},
         hoverinfo="skip",
-        mode="lines",
+        marker_color='indianred',
+        marker_line_width=1.5,
+        opacity=0.6
     )
     layout = dict(
         plot_bgcolor=colors["background"],
         paper_bgcolor=colors["background"],
-        font={"color": "#E2A012"},
+        font={"color": "#ffffff"},
+        marker_color= "#ffffff",
         height=700,
         xaxis={
-            "range": [8, 22],
+            "range": [5, 22],
             "showline": True,
             "zeroline": False,
             "fixedrange": True,
-            "tickvals": [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22],
-            "ticktext": ["8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22"],
+            "tickvals": [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22],
+            "ticktext": ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22"],
             "title": "Uhrzeit",
         },
         yaxis={
@@ -273,7 +272,7 @@ def generate_qr_code_graph(interval):
             "fixedrange": True,
             "zeroline": False,
             "gridcolor": colors["graph_line"],
-            "nticks": df_count['counts'],
+            "nticks": df_count['counts']
         },
     )
 
@@ -341,9 +340,16 @@ def generate_benefits_graph(interval):
         type="bar",
         x=df_count_benefits['Benefit'],
         y=df_count_benefits['counts'],
+        text=df_count_benefits['counts'],
+        textposition='inside',
         line={"color": "#42C4F7"},
+        #line={"color": "#42C4F7"},
         hoverinfo="skip",
         mode="lines",
+        marker_color='indianred',
+        marker_line_color='rgb(8,48,107)',
+        marker_line_width=1.5,
+        opacity=0.6
     )
 
     layout = dict(

@@ -1,7 +1,7 @@
 import pandas as pd
 import SQL_API
 from SQL_API import SQL_Writer
-
+import datetime as dt
 
 class BI_Data():
 
@@ -11,6 +11,7 @@ class BI_Data():
         self.gesch_bene_df = self.connection.get_df_select_geschaefte()
         self.qr_code_df = self.connection.get_df_select_qr_code()
         self.bi_light_df = self.connection.get_df_select_bi_light()
+        self.qr_code_pro_stunde_h = None
 
     def refresh_data(self):
         self.connection = SQL_Writer()
@@ -18,6 +19,19 @@ class BI_Data():
         self.gesch_bene_df = self.connection.get_df_select_geschaefte()
         self.qr_code_df = self.connection.get_df_select_qr_code()
         self.bi_light_df = self.connection.get_df_select_bi_light()
+
+    def qr_code_pro_stunde_heute(self):
+        # korrekte umsetzung
+        now = dt.datetime.now()
+        today = now.day
+        print("Heute ist:" + str(today))
+        self.refresh_data()
+        self.qr_code_df['hour'] = self.qr_code_df['Timestamp'].dt.hour
+        self.qr_code_df['day'] = self.qr_code_df['Timestamp'].dt.day
+        self.qr_code_df['month'] = self.qr_code_df['Timestamp'].dt.month
+        data_day = self.qr_code_df.loc[self.qr_code_df['day'] == today]
+        self.qr_code_pro_stunde_h = data_day.groupby(['hour']).size().reset_index(name='counts')
+        print(self.qr_code_pro_stunde_h)
 
 if __name__ == '__main__':
     data = BI_Data()
