@@ -11,8 +11,13 @@ from dash.exceptions import PreventUpdate
 from dash.dependencies import Input, Output, State
 import pandas as pd
 from plot_data import BI_Data
+from scipy.stats import rayleigh
 
-GRAPH_INTERVAL = os.environ.get("GRAPH_INTERVAL", 15000)
+# init BI_Data
+data = BI_Data()
+print("BI-Light am {}, {}.{}".format(data.today_data.weekday.values[0], data.today_data.today.values[0], data.today_data.month.values[0]))
+
+GRAPH_INTERVAL = os.environ.get("GRAPH_INTERVAL", 36000)
 app = dash.Dash(
     __name__,
     meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
@@ -23,10 +28,11 @@ colors = {
     'background': '#082255',
     'bg2': "#082255",
     "graph_line": "#E2A012",
+    "graph_bg": "#E2A012",
     'text': '#7FDBFF'
 }
 
-data = BI_Data()
+
 
 # ------------------------------------------------------------------------------
 # App layout
@@ -38,7 +44,7 @@ app.layout = html.Div(
                 html.Div (
                     [
 
-                    html.H4("BI-Light", className='app__header__title'),
+                    html.H4("BI-Light am {}, {}.{}".format(data.today_data.weekday.values[0], data.today_data.today.values[0], data.today_data.month.values[0]), className='app__header__title'),
                     html.P(
                         "Diese app sendet SQL-Anfragen zu gescannten QR-Codes.",
                         className="app__header__title--grey",
@@ -64,7 +70,11 @@ app.layout = html.Div(
                 html.Div(
                     [
                         html.Div(
-                            [html.H6("QR-Codes pro Stunde", className="graph__title")]
+                            [
+                                html.H6(
+                                    "QR-Codes am {}, {}.{}".format(data.today_data.weekday.values[0], data.today_data.today.values[0], data.today_data.month.values[0]), className="graph__title"
+                                )
+                            ]
                         ),
                         # Graph zu QR-Codes
                         dcc.Graph(
@@ -88,12 +98,12 @@ app.layout = html.Div(
                                 html.Div(
                                     [
                                         html.H6(
-                                            "Meist eingelöste Benefits", className="graph__title"
+                                            "Meist eingelöste Benefits am {}, {}.{}".format(data.today_data.weekday.values[0], data.today_data.today.values[0], data.today_data.month.values[0]), className="graph__title"
                                         )
                                     ]
                                 ),
                                 dcc.Graph(
-                                    id="benefit-last-eingeloest_2",
+                                    id="benefit-last-eingeloest_today",
                                     figure=dict(
                                         layout=dict(
                                             plot_bgcolor=colors["background"],
@@ -115,7 +125,7 @@ app.layout = html.Div(
                                 html.Div(
                                     [
                                         html.H6(
-                                            "Week Live Ticker",
+                                            "Daily Live Ticker",
                                             className="graph__title",
                                         )
                                     ]
@@ -176,7 +186,7 @@ app.layout = html.Div(
                                 html.Div(
                                     [
                                         html.H6(
-                                            "Meist eingelöste Benefits", className="graph__title"
+                                            "Meist eingelöste Benefits insgesamt", className="graph__title"
                                         )
                                     ]
                                 ),
@@ -225,7 +235,7 @@ def generate_qr_code_graph(interval):
 
     # korrekte umsetzung
     data.qr_code_pro_stunde_heute()
-    df_count = data.qr_code_pro_stunde_h
+    df_count = data.qr_code_pro_stunde
 
     # data.qr_code_df['hour'] = data.qr_code_df['Timestamp'].dt.hour
     # data.qr_code_df['day'] = data.qr_code_df['Timestamp'].dt.day
@@ -233,19 +243,21 @@ def generate_qr_code_graph(interval):
     # df_count = data.qr_code_df.groupby(['hour']).size().reset_index(name='counts')
     print(df_count)
 
+
     trace = dict(
         type="bar",
         mode='bar',
         text=df_count['counts'],
+        text_color='#ffffff',
         textposition='inside',
         x=df_count['hour'],
         y=df_count['counts'],
         colors='#ffffff',
-        line={"color": "#E2A012"},
+        line={"color": "#ffffff"},
         hoverinfo="skip",
-        marker_color='indianred',
+        marker=dict(color='#FF6C00'),
         marker_line_width=1.5,
-        opacity=0.6
+        opacity=0.9
     )
     layout = dict(
         plot_bgcolor=colors["background"],
@@ -265,13 +277,13 @@ def generate_qr_code_graph(interval):
         yaxis={
             "range": [
                 min(0, min(df_count['counts'])),
-                max(100, max(df_count['counts']) + max(df_count['counts'])),
+                max(100, max(df_count['counts']) + 50),
             ],
             "showgrid": True,
             "showline": True,
             "fixedrange": True,
             "zeroline": False,
-            "gridcolor": colors["graph_line"],
+            "gridcolor": "#ffffff",
             "nticks": df_count['counts']
         },
     )
@@ -293,20 +305,13 @@ def generate_benefits_graph(interval):
         names=df_count_benefits['Benefit'],
         values=df_count_benefits['counts'],
         text=df_count_benefits['Benefit'],
+        labels=df_count_benefits['Benefit'],
+        showlegend=True,
         textposition='inside',
         line={"color": "#42C4F7"},
         hoverinfo="skip",
         mode="lines",
     )
-    # trace = dict(
-    #     type="bar",
-    #     x=df_count_benefits['Benefit'],
-    #     y=df_count_benefits['counts'],
-    #     line={"color": "#42C4F7"},
-    #     hoverinfo="skip",
-    #     mode="lines",
-    # )
-
     layout = dict(
         plot_bgcolor=colors["background"],
         paper_bgcolor=colors["background"],
@@ -317,50 +322,43 @@ def generate_benefits_graph(interval):
     return dict(data=[trace], layout=layout)
 
 @app.callback(
-    Output("benefit-last-eingeloest_2", "figure"), [Input("qr-code-update", "n_intervals")]
+    Output("benefit-last-eingeloest_today", "figure"), [Input("qr-code-update", "n_intervals")]
 )
 def generate_benefits_graph(interval):
     """
     :param interval:
     :return:
     """
+    # korrekte umsetzung
+    data.benefit_heute()
+    df_count_benefits = data.benefits_pro_day
+    try:
+        trace = dict(
+            type="bar",
+            x=df_count_benefits['Benefit'],
+            y=df_count_benefits['counts'],
+            text=df_count_benefits['counts'],
+            textposition='inside',
+            line={"color": "#42C4F7"},
+            #line={"color": "#42C4F7"},
+            hoverinfo="skip",
+            mode="lines",
+            marker=dict(color='#ff8747'),
+            marker_line_color='rgb(8,48,107)',
+            marker_line_width=1.5,
+            opacity=0.9
+        )
 
-    df_count_benefits = data.bi_light_df.groupby(['Benefit']).size().reset_index(name='counts').sort_values(by=['counts'], ascending=False)
-    # trace = dict(
-    #     type="pie",
-    #     names=df_count_benefits['Benefit'],
-    #     values=df_count_benefits['counts'],
-    #     text=df_count_benefits['Benefit'],
-    #     textposition='inside',
-    #     line={"color": "#42C4F7"},
-    #     hoverinfo="skip",
-    #     mode="lines",
-    # )
-    trace = dict(
-        type="bar",
-        x=df_count_benefits['Benefit'],
-        y=df_count_benefits['counts'],
-        text=df_count_benefits['counts'],
-        textposition='inside',
-        line={"color": "#42C4F7"},
-        #line={"color": "#42C4F7"},
-        hoverinfo="skip",
-        mode="lines",
-        marker_color='indianred',
-        marker_line_color='rgb(8,48,107)',
-        marker_line_width=1.5,
-        opacity=0.6
-    )
+        layout = dict(
+            plot_bgcolor=colors["background"],
+            paper_bgcolor=colors["background"],
+            font={"color": "#fff"}
+        )
 
-    layout = dict(
-        plot_bgcolor=colors["background"],
-        paper_bgcolor=colors["background"],
-        font={"color": "#fff"}
-    )
-
+    except Exception as error:
+        raise PreventUpdate
     return dict(data=[trace], layout=layout)
     # return dict(data=df_count_benefits.to_dict('series'), layout=layout)
-
 @app.callback(
     Output("week-update-histogram", "figure"),
     [Input("qr-code-update", "n_intervals")],
@@ -378,24 +376,125 @@ def gen_wind_histogram(interval, qr_code_live_figure, slider_value, auto_state):
     :params slider_value: current slider value
     :params auto_state: current auto state
     """
-    qr_code_value = []
-    data.qr_code_df['hour'] = data.qr_code_df['Timestamp'].dt.hour
-    data.qr_code_df['day'] = data.qr_code_df['Timestamp'].dt.day
-    data.qr_code_df['month'] = data.qr_code_df['Timestamp'].dt.month
-    df_count = data.qr_code_df.groupby(['day']).size().reset_index(name='counts')
+    #print(qr_code_live_figure)
+    qr_code_values = []
+
+    # korrekte umsetzung
+    data.qr_code_pro_stunde_monthly()
+    df_count = data.qr_code_pro_month
     try:
         # Check to see whether wind-speed has been plotted yet
         if qr_code_live_figure is not None:
-            qr_code_value = qr_code_live_figure["data"][0]["y"]
+            qr_code_values = qr_code_live_figure["data"][0]["y"]
         if "Auto" in auto_state:
             bin_val = np.histogram(
-                qr_code_value,
-                bins=range(int(round(min(qr_code_value))), int(round(max(qr_code_value)))),
+                qr_code_values,
+                bins=range(int(round(min(qr_code_values))), int(round(max(qr_code_values)))),
             )
         else:
-            bin_val = np.histogram(qr_code_value, bins=slider_value)
+            bin_val = np.histogram(qr_code_values, bins=slider_value)
     except Exception as error:
         raise PreventUpdate
+
+    avg_val = float(sum(qr_code_values)) / len(qr_code_values)
+    median_val = np.median(qr_code_values)
+
+    pdf_fitted = rayleigh.pdf(
+        bin_val[1], loc=(avg_val) * 0.55, scale=(bin_val[1][-1] - bin_val[1][0]) / 3
+    )
+    y_val = (pdf_fitted * max(bin_val[0]) * 20,)
+    y_val_max = max(y_val[0])
+    bin_val_max = max(bin_val[0])
+
+    trace = dict(
+        type="bar",
+        x=bin_val[1],
+        y=bin_val[0],
+        marker={"color": colors["graph_line"]},
+        showlegend=False,
+        hoverinfo="x+y",
+    )
+
+    traces_scatter = [
+        {"line_dash": "dash", "line_color": "#2E5266", "name": "Average"},
+        {"line_dash": "dot", "line_color": "#BD9391", "name": "Median"},
+    ]
+
+    scatter_data = [
+        dict(
+            type="scatter",
+            x=[bin_val[int(len(bin_val) / 2)]],
+            y=[0],
+            mode="lines",
+            line={"dash": traces["line_dash"], "color": traces["line_color"]},
+            marker={"opacity": 0},
+            visible=True,
+            name=traces["name"],
+        )
+        for traces in traces_scatter
+    ]
+
+    trace3 = dict(
+        type="scatter",
+        mode="lines",
+        line={"color": "#42C4F7"},
+        y=y_val[0],
+        x=bin_val[1][: len(bin_val[1])],
+        name="Rayleigh Fit",
+    )
+    layout = dict(
+        height=400,
+        plot_bgcolor=colors["background"],
+        paper_bgcolor=colors["background"],
+        font={"color": "#fff"},
+        xaxis={
+            "title": "Anzahl QR-Codes",
+            "showgrid": False,
+            "showline": False,
+            "fixedrange": True,
+        },
+        yaxis={
+            "showgrid": False,
+            "showline": False,
+            "zeroline": False,
+            "title": "Verteilung",
+            "fixedrange": True,
+        },
+        autosize=True,
+        bargap=0.01,
+        bargroupgap=0,
+        hovermode="closest",
+        legend={
+            "orientation": "h",
+            "yanchor": "bottom",
+            "xanchor": "center",
+            "y": 1,
+            "x": 0.5,
+        },
+        shapes=[
+            {
+                "xref": "x",
+                "yref": "y",
+                "y1": int(max(bin_val_max, y_val_max)) + 0.5,
+                "y0": 0,
+                "x0": avg_val,
+                "x1": avg_val,
+                "type": "line",
+                "line": {"dash": "dash", "color": "#2E5266", "width": 5},
+            },
+            {
+                "xref": "x",
+                "yref": "y",
+                "y1": int(max(bin_val_max, y_val_max)) + 0.5,
+                "y0": 0,
+                "x0": median_val,
+                "x1": median_val,
+                "type": "line",
+                "line": {"dash": "dot", "color": "#BD9391", "width": 5},
+            },
+        ],
+    )
+    return dict(data=[trace, scatter_data[0], scatter_data[1], trace3], layout=layout)
 
 @app.callback(
     Output("bin-auto", "value"),
