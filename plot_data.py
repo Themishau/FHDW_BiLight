@@ -2,7 +2,7 @@ import pandas as pd
 import SQL_API
 from SQL_API import SQL_Writer
 import datetime as dt
-
+import time
 class BI_Data():
 
     def __init__(self, connection=None):
@@ -15,6 +15,7 @@ class BI_Data():
         self.qr_code_pro_month = None
         self.benefits_pro_day = None
         self.date = dt.datetime.now().day
+        self.refresh_time = self.get_current_time()
         #self.date = 22
         self.weekdaydict = {0:"Montag",
                             1:"Dienstag",
@@ -24,6 +25,14 @@ class BI_Data():
                             5:"Samstag",
                             6:"Sonntag"}
         self.today_data = self.set_today_data()
+
+    def get_current_time(self):
+        """ Helper function to get the current time in seconds. """
+
+        now = dt.datetime.now()
+        total_time = (now.hour * 3600) + (now.minute * 60) + now.second
+        return total_time
+
 
     def set_today_data(self):
         now = dt.datetime.now()
@@ -41,12 +50,20 @@ class BI_Data():
         return df
 
     def refresh_data(self):
-        self.connection.reconnect_to_Database()
-        self.benefit_df = self.connection.get_df_select_benefits()
-        self.gesch_bene_df = self.connection.get_df_select_geschaefte()
-        self.qr_code_df = self.connection.get_df_select_qr_code()
-        self.bi_light_df = self.connection.get_df_select_bi_light()
-        self.today_data = self.set_today_data()
+        if (self.get_current_time() - self.refresh_time) > 360:
+            self.connection.reconnect_to_Database()
+            time.sleep(1)
+            self.refresh_time = self.get_current_time()
+            print('- {} - '.format(dt.datetime.now()))
+            print('refreshed')
+            try:
+                self.benefit_df = self.connection.get_df_select_benefits()
+                self.gesch_bene_df = self.connection.get_df_select_geschaefte()
+                self.qr_code_df = self.connection.get_df_select_qr_code()
+                self.bi_light_df = self.connection.get_df_select_bi_light()
+                self.today_data = self.set_today_data()
+            except:
+                return
 
 
     def qr_code_pro_stunde_heute(self):

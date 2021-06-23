@@ -17,7 +17,7 @@ from scipy.stats import rayleigh
 data = BI_Data()
 print("BI-Light am {}, {}.{}".format(data.today_data.weekday.values[0], data.today_data.today.values[0], data.today_data.month.values[0]))
 
-GRAPH_INTERVAL = os.environ.get("GRAPH_INTERVAL", 36000)
+GRAPH_INTERVAL = os.environ.get("GRAPH_INTERVAL", 5000)
 app = dash.Dash(
     __name__,
     meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
@@ -89,6 +89,7 @@ app.layout = html.Div(
                         # Infos zu Interval
                         dcc.Interval(
                             id="qr-code-update",
+                            #interval=3600000.0,
                             interval=int(GRAPH_INTERVAL),
                             n_intervals=0,
                         ),
@@ -227,11 +228,14 @@ def get_current_time():
 def generate_qr_code_graph(interval):
     """
     genrates graph with qr_code_count
+    :param n_intervals:
     :param interval: update the graph based on an interval
     :return:
     """
-
-    data.refresh_data()
+    try:
+        data.refresh_data()
+    except AttributeError:
+        raise PreventUpdate
 
     # korrekte umsetzung
     data.qr_code_pro_stunde_heute()

@@ -356,4 +356,7 @@ class SQL_Writer():
         return connection
 
     def close_connection(self):
-        self.db_connection.close()
+        try:
+            self.db_connection.close()
+        except:
+            return
