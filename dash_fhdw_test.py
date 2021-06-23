@@ -241,8 +241,6 @@ def generate_qr_code_graph(interval):
     # data.qr_code_df['day'] = data.qr_code_df['Timestamp'].dt.day
     # data.qr_code_df['month'] = data.qr_code_df['Timestamp'].dt.month
     # df_count = data.qr_code_df.groupby(['hour']).size().reset_index(name='counts')
-    print(df_count)
-
 
     trace = dict(
         type="bar",
@@ -266,12 +264,12 @@ def generate_qr_code_graph(interval):
         marker_color= "#ffffff",
         height=700,
         xaxis={
-            "range": [5, 22],
+            "range": [4.5, 22.5],
             "showline": True,
             "zeroline": False,
             "fixedrange": True,
-            "tickvals": [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22],
-            "ticktext": ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22"],
+            "tickvals": [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
+            "ticktext": ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"],
             "title": "Uhrzeit",
         },
         yaxis={

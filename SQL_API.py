@@ -22,6 +22,11 @@ class SQL_Writer():
         self.user_name = 'dummy_insert'
         self.cursor = self.db_connection.cursor()
 
+    def reconnect_to_Database(self):
+        self.close_connection()
+        self.db_connection = self.create_connection_pymysql()
+        self.cursor = self.db_connection.cursor()
+
     def testConnection(self):
         sqlEngine = create_engine("mysql+pymysql://qr_scan_reader_test:1234@localhost:3310/RheinBerg_QRCode")
         dbConnection = sqlEngine.connect()
@@ -348,7 +353,6 @@ class SQL_Writer():
                                      user='dummy_insert',
                                      password='1234',
                                      db='RheinBerg_QRCode')
-        print('success')
         return connection
 
     def close_connection(self):

@@ -14,6 +14,8 @@ class BI_Data():
         self.qr_code_pro_stunde = None
         self.qr_code_pro_month = None
         self.benefits_pro_day = None
+        self.date = dt.datetime.now().day
+        #self.date = 22
         self.weekdaydict = {0:"Montag",
                             1:"Dienstag",
                             2:"Mittwoch",
@@ -39,12 +41,13 @@ class BI_Data():
         return df
 
     def refresh_data(self):
-        self.connection = SQL_Writer()
+        self.connection.reconnect_to_Database()
         self.benefit_df = self.connection.get_df_select_benefits()
         self.gesch_bene_df = self.connection.get_df_select_geschaefte()
         self.qr_code_df = self.connection.get_df_select_qr_code()
         self.bi_light_df = self.connection.get_df_select_bi_light()
         self.today_data = self.set_today_data()
+
 
     def qr_code_pro_stunde_heute(self):
         # korrekte umsetzung
@@ -54,7 +57,7 @@ class BI_Data():
         self.qr_code_df['hour'] = self.qr_code_df['Timestamp'].dt.hour
         self.qr_code_df['day'] = self.qr_code_df['Timestamp'].dt.day
         self.qr_code_df['month'] = self.qr_code_df['Timestamp'].dt.month
-        data_day = self.qr_code_df.loc[self.qr_code_df['day'] == today]
+        data_day = self.qr_code_df.loc[self.qr_code_df['day'] == self.date]
         self.qr_code_pro_stunde = data_day.groupby(['hour']).size().reset_index(name='counts')
         #print(self.qr_code_pro_stunde)
 
@@ -66,7 +69,7 @@ class BI_Data():
         self.qr_code_df['hour'] = self.qr_code_df['Timestamp'].dt.hour
         self.qr_code_df['day'] = self.qr_code_df['Timestamp'].dt.day
         self.qr_code_df['month'] = self.qr_code_df['Timestamp'].dt.month
-        data_day = self.qr_code_df.loc[self.qr_code_df['day'] == today]
+        data_day = self.qr_code_df.loc[self.qr_code_df['day'] == self.date]
         self.qr_code_pro_month = data_day.groupby(['month']).size().reset_index(name='counts')
         #print(self.qr_code_pro_stunde)
 
@@ -79,7 +82,7 @@ class BI_Data():
         self.bi_light_df['hour'] = self.bi_light_df['Timestamp'].dt.hour
         self.bi_light_df['day'] = self.bi_light_df['Timestamp'].dt.day
         self.bi_light_df['month'] = self.bi_light_df['Timestamp'].dt.month
-        data_day = self.bi_light_df.loc[self.bi_light_df['day'] == today]
+        data_day = self.bi_light_df.loc[self.bi_light_df['day'] == self.date]
         self.benefits_pro_day = data_day.groupby(['Benefit','day']).size().reset_index(name='counts').sort_values(by=['counts'], ascending=False)
         #print(self.benefits_pro_day)
         #print(self.benefit_pro_day)
