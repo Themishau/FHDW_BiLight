@@ -397,105 +397,107 @@ def gen_wind_histogram(interval, qr_code_live_figure, slider_value, auto_state):
             bin_val = np.histogram(qr_code_values, bins=slider_value)
     except Exception as error:
         raise PreventUpdate
+    try:
+        avg_val = float(sum(qr_code_values)) / len(qr_code_values)
+        median_val = np.median(qr_code_values)
 
-    avg_val = float(sum(qr_code_values)) / len(qr_code_values)
-    median_val = np.median(qr_code_values)
-
-    pdf_fitted = rayleigh.pdf(
-        bin_val[1], loc=(avg_val) * 0.55, scale=(bin_val[1][-1] - bin_val[1][0]) / 3
-    )
-    y_val = (pdf_fitted * max(bin_val[0]) * 20,)
-    y_val_max = max(y_val[0])
-    bin_val_max = max(bin_val[0])
-
-    trace = dict(
-        type="bar",
-        x=bin_val[1],
-        y=bin_val[0],
-        marker={"color": colors["graph_line"]},
-        showlegend=False,
-        hoverinfo="x+y",
-    )
-
-    traces_scatter = [
-        {"line_dash": "dash", "line_color": "#2E5266", "name": "Average"},
-        {"line_dash": "dot", "line_color": "#BD9391", "name": "Median"},
-    ]
-
-    scatter_data = [
-        dict(
-            type="scatter",
-            x=[bin_val[int(len(bin_val) / 2)]],
-            y=[0],
-            mode="lines",
-            line={"dash": traces["line_dash"], "color": traces["line_color"]},
-            marker={"opacity": 0},
-            visible=True,
-            name=traces["name"],
+        pdf_fitted = rayleigh.pdf(
+            bin_val[1], loc=(avg_val) * 0.55, scale=(bin_val[1][-1] - bin_val[1][0]) / 3
         )
-        for traces in traces_scatter
-    ]
+        y_val = (pdf_fitted * max(bin_val[0]) * 20,)
+        y_val_max = max(y_val[0])
+        bin_val_max = max(bin_val[0])
 
-    trace3 = dict(
-        type="scatter",
-        mode="lines",
-        line={"color": "#42C4F7"},
-        y=y_val[0],
-        x=bin_val[1][: len(bin_val[1])],
-        name="Rayleigh Fit",
-    )
-    layout = dict(
-        height=400,
-        plot_bgcolor=colors["background"],
-        paper_bgcolor=colors["background"],
-        font={"color": "#fff"},
-        xaxis={
-            "title": "Anzahl QR-Codes",
-            "showgrid": False,
-            "showline": False,
-            "fixedrange": True,
-        },
-        yaxis={
-            "showgrid": False,
-            "showline": False,
-            "zeroline": False,
-            "title": "Verteilung",
-            "fixedrange": True,
-        },
-        autosize=True,
-        bargap=0.01,
-        bargroupgap=0,
-        hovermode="closest",
-        legend={
-            "orientation": "h",
-            "yanchor": "bottom",
-            "xanchor": "center",
-            "y": 1,
-            "x": 0.5,
-        },
-        shapes=[
-            {
-                "xref": "x",
-                "yref": "y",
-                "y1": int(max(bin_val_max, y_val_max)) + 0.5,
-                "y0": 0,
-                "x0": avg_val,
-                "x1": avg_val,
-                "type": "line",
-                "line": {"dash": "dash", "color": "#2E5266", "width": 5},
+        trace = dict(
+            type="bar",
+            x=bin_val[1],
+            y=bin_val[0],
+            marker={"color": colors["graph_line"]},
+            showlegend=False,
+            hoverinfo="x+y",
+        )
+
+        traces_scatter = [
+            {"line_dash": "dash", "line_color": "#2E5266", "name": "Average"},
+            {"line_dash": "dot", "line_color": "#BD9391", "name": "Median"},
+        ]
+
+        scatter_data = [
+            dict(
+                type="scatter",
+                x=[bin_val[int(len(bin_val) / 2)]],
+                y=[0],
+                mode="lines",
+                line={"dash": traces["line_dash"], "color": traces["line_color"]},
+                marker={"opacity": 0},
+                visible=True,
+                name=traces["name"],
+            )
+            for traces in traces_scatter
+        ]
+
+        trace3 = dict(
+            type="scatter",
+            mode="lines",
+            line={"color": "#42C4F7"},
+            y=y_val[0],
+            x=bin_val[1][: len(bin_val[1])],
+            name="Rayleigh Fit",
+        )
+        layout = dict(
+            height=400,
+            plot_bgcolor=colors["background"],
+            paper_bgcolor=colors["background"],
+            font={"color": "#fff"},
+            xaxis={
+                "title": "Anzahl QR-Codes",
+                "showgrid": False,
+                "showline": False,
+                "fixedrange": True,
             },
-            {
-                "xref": "x",
-                "yref": "y",
-                "y1": int(max(bin_val_max, y_val_max)) + 0.5,
-                "y0": 0,
-                "x0": median_val,
-                "x1": median_val,
-                "type": "line",
-                "line": {"dash": "dot", "color": "#BD9391", "width": 5},
+            yaxis={
+                "showgrid": False,
+                "showline": False,
+                "zeroline": False,
+                "title": "Verteilung",
+                "fixedrange": True,
             },
-        ],
-    )
+            autosize=True,
+            bargap=0.01,
+            bargroupgap=0,
+            hovermode="closest",
+            legend={
+                "orientation": "h",
+                "yanchor": "bottom",
+                "xanchor": "center",
+                "y": 1,
+                "x": 0.5,
+            },
+            shapes=[
+                {
+                    "xref": "x",
+                    "yref": "y",
+                    "y1": int(max(bin_val_max, y_val_max)) + 0.5,
+                    "y0": 0,
+                    "x0": avg_val,
+                    "x1": avg_val,
+                    "type": "line",
+                    "line": {"dash": "dash", "color": "#2E5266", "width": 5},
+                },
+                {
+                    "xref": "x",
+                    "yref": "y",
+                    "y1": int(max(bin_val_max, y_val_max)) + 0.5,
+                    "y0": 0,
+                    "x0": median_val,
+                    "x1": median_val,
+                    "type": "line",
+                    "line": {"dash": "dot", "color": "#BD9391", "width": 5},
+                },
+            ],
+        )
+    except Exception as error:
+        raise PreventUpdate
     return dict(data=[trace, scatter_data[0], scatter_data[1], trace3], layout=layout)
 
 @app.callback(
