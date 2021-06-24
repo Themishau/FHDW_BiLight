@@ -1,5 +1,4 @@
 import pandas as pd
-import SQL_API
 from SQL_API import SQL_Writer
 import datetime as dt
 import time
@@ -15,6 +14,7 @@ class BI_Data():
         self.qr_code_pro_month = None
         self.benefits_pro_day = None
         self.date = dt.datetime.now().day
+        self.month = dt.datetime.now().month
         self.refresh_time = self.get_current_time()
         #self.date = 22
         self.weekdaydict = {0:"Montag",
@@ -86,8 +86,8 @@ class BI_Data():
         self.qr_code_df['hour'] = self.qr_code_df['Timestamp'].dt.hour
         self.qr_code_df['day'] = self.qr_code_df['Timestamp'].dt.day
         self.qr_code_df['month'] = self.qr_code_df['Timestamp'].dt.month
-        data_day = self.qr_code_df.loc[self.qr_code_df['day'] == self.date]
-        self.qr_code_pro_month = data_day.groupby(['month']).size().reset_index(name='counts')
+        #data_month = self.qr_code_df.loc[self.qr_code_df['month'] == self.date]
+        self.qr_code_pro_month = self.qr_code_df.groupby(['day']).size().reset_index(name='counts')
         #print(self.qr_code_pro_stunde)
 
     def benefit_heute(self):

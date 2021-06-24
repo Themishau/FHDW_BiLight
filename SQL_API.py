@@ -353,6 +353,11 @@ class SQL_Writer():
                                      user='dummy_insert',
                                      password='1234',
                                      db='RheinBerg_QRCode')
+        # connection = pymysql.connect(host='172.17.0.3',    # change to themishaurheinberg.duckdns.org
+        #                              port=3306,           # change port if needed
+        #                              user='dummy_insert',
+        #                              password='1234',
+        #                              db='RheinBerg_QRCode')
         return connection
 
     def close_connection(self):
