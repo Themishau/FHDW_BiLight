@@ -50,7 +50,7 @@ class BI_Data():
         return df
 
     def refresh_data(self):
-        if (self.get_current_time() - self.refresh_time) > 360:
+        if (self.get_current_time() - self.refresh_time) > 120:
             self.connection.reconnect_to_Database()
             time.sleep(1)
             self.refresh_time = self.get_current_time()
@@ -67,42 +67,63 @@ class BI_Data():
 
 
     def qr_code_pro_stunde_heute(self):
-        # korrekte umsetzung
-        now = dt.datetime.now()
-        today = now.day
-        #print("Heute ist:" + str(today))
-        self.qr_code_df['hour'] = self.qr_code_df['Timestamp'].dt.hour
-        self.qr_code_df['day'] = self.qr_code_df['Timestamp'].dt.day
-        self.qr_code_df['month'] = self.qr_code_df['Timestamp'].dt.month
-        data_day = self.qr_code_df.loc[self.qr_code_df['day'] == self.date]
-        self.qr_code_pro_stunde = data_day.groupby(['hour']).size().reset_index(name='counts')
-        #print(self.qr_code_pro_stunde)
+        try:
+            # korrekte umsetzung
+            now = dt.datetime.now()
+            today = now.day
+            #print("Heute ist:" + str(today))
+            self.qr_code_df['hour'] = self.qr_code_df['Timestamp'].dt.hour
+            self.qr_code_df['day'] = self.qr_code_df['Timestamp'].dt.day
+            self.qr_code_df['month'] = self.qr_code_df['Timestamp'].dt.month
+            data_day = self.qr_code_df.loc[self.qr_code_df['day'] == self.date]
+            self.qr_code_pro_stunde = data_day.groupby(['hour']).size().reset_index(name='counts')
+            #print(self.qr_code_pro_stunde)
+        except AssertionError as e:
+            print(e)
+            print("-------- qr_code_pro_stunde_heute --------")
+            print(self.qr_code_df['day'])
+            print('------')
+            print(self.date)
 
     def qr_code_pro_stunde_monthly(self):
-        # korrekte umsetzung
-        now = dt.datetime.now()
-        today = now.day
-        #print("Heute ist:" + str(today))
-        self.qr_code_df['hour'] = self.qr_code_df['Timestamp'].dt.hour
-        self.qr_code_df['day'] = self.qr_code_df['Timestamp'].dt.day
-        self.qr_code_df['month'] = self.qr_code_df['Timestamp'].dt.month
-        #data_month = self.qr_code_df.loc[self.qr_code_df['month'] == self.date]
-        self.qr_code_pro_month = self.qr_code_df.groupby(['day']).size().reset_index(name='counts')
-        #print(self.qr_code_pro_stunde)
+        try:
+            # korrekte umsetzung
+            now = dt.datetime.now()
+            today = now.day
+            #print("Heute ist:" + str(today))
+            self.qr_code_df['hour'] = self.qr_code_df['Timestamp'].dt.hour
+            self.qr_code_df['day'] = self.qr_code_df['Timestamp'].dt.day
+            self.qr_code_df['month'] = self.qr_code_df['Timestamp'].dt.month
+            #data_month = self.qr_code_df.loc[self.qr_code_df['month'] == self.date]
+            self.qr_code_pro_month = self.qr_code_df.groupby(['day']).size().reset_index(name='counts')
+            #print(self.qr_code_pro_stunde)
+        except AssertionError as e:
+            print(e)
+            print("-------- qr_code_pro_stunde_monthly --------")
+            print(self.qr_code_df['day'])
+            print('------')
+            print(self.date)
 
     def benefit_heute(self):
-        # korrekte umsetzung
-        # data.bi_light_df.groupby(['Benefit']).size().reset_index(name='counts').sort_values(by=['counts'], ascending=False)
-        now = dt.datetime.now()
-        today = now.day
-        #print("Heute ist:" + str(today))
-        self.bi_light_df['hour'] = self.bi_light_df['Timestamp'].dt.hour
-        self.bi_light_df['day'] = self.bi_light_df['Timestamp'].dt.day
-        self.bi_light_df['month'] = self.bi_light_df['Timestamp'].dt.month
-        data_day = self.bi_light_df.loc[self.bi_light_df['day'] == self.date]
-        self.benefits_pro_day = data_day.groupby(['Benefit','day']).size().reset_index(name='counts').sort_values(by=['counts'], ascending=False)
-        #print(self.benefits_pro_day)
-        #print(self.benefit_pro_day)
+        try:
+            # korrekte umsetzung
+            # data.bi_light_df.groupby(['Benefit']).size().reset_index(name='counts').sort_values(by=['counts'], ascending=False)
+            now = dt.datetime.now()
+            today = now.day
+            #print("Heute ist:" + str(today))
+            self.bi_light_df['hour'] = self.bi_light_df['Timestamp'].dt.hour
+            self.bi_light_df['day'] = self.bi_light_df['Timestamp'].dt.day
+            self.bi_light_df['month'] = self.bi_light_df['Timestamp'].dt.month
+            data_day = self.bi_light_df.loc[self.bi_light_df['day'] == self.date]
+            self.benefits_pro_day = data_day.groupby(['Benefit','day']).size().reset_index(name='counts').sort_values(by=['counts'], ascending=False)
+            #print(self.benefits_pro_day)
+            #print(self.benefit_pro_day)
+        except AssertionError as e:
+            print(e)
+            print("--------benefit heute --------")
+            print(self.bi_light_df['day'])
+            print('------')
+            print(self.date)
 
 if __name__ == '__main__':
     data = BI_Data()

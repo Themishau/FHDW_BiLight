@@ -348,16 +348,16 @@ class SQL_Writer():
 
 
     def create_connection_pymysql(self):
-        connection = pymysql.connect(host='localhost',    # change to themishaurheinberg.duckdns.org
-                                     port=3310,           # change port if needed
-                                     user='dummy_insert',
-                                     password='1234',
-                                     db='RheinBerg_QRCode')
-        # connection = pymysql.connect(host='172.17.0.3',    # change to themishaurheinberg.duckdns.org
-        #                              port=3306,           # change port if needed
+        # connection = pymysql.connect(host='localhost',    # change to themishaurheinberg.duckdns.org
+        #                              port=3310,           # change port if needed
         #                              user='dummy_insert',
         #                              password='1234',
         #                              db='RheinBerg_QRCode')
+        connection = pymysql.connect(host='175.20.0.128',    # change to themishaurheinberg.duckdns.org
+                                     port=3306,           # change port if needed
+                                     user='dummy_insert',
+                                     password='1234',
+                                     db='RheinBerg_QRCode')
         return connection
 
     def close_connection(self):
