@@ -41,7 +41,7 @@ app.layout = html.Div(
 
                     html.H4("BI-Light am {}, {}.{}".format(data.today_data.weekday.values[0], data.today_data.today.values[0], data.today_data.month.values[0]), className='app__header__title'),
                     html.P(
-                        "Diese app sendet SQL-Anfragen zu gescannten QR-Codes.",
+                        "Diese App zeigt die eingelösten QR-Codes in Echtzeit.",
                         className="app__header__title--grey",
                         ),
                     ],
@@ -187,18 +187,20 @@ def generate_qr_code_graph(interval):
     :param interval: update the graph based on an interval
     :return:
     """
+
+    data.refresh_data()
+
+    # korrekte umsetzung
+    data.qr_code_pro_stunde_heute()
+    df_count = data.qr_code_pro_stunde
+
+    # data.qr_code_df['hour'] = data.qr_code_df['Timestamp'].dt.hour
+    # data.qr_code_df['day'] = data.qr_code_df['Timestamp'].dt.day
+    # data.qr_code_df['month'] = data.qr_code_df['Timestamp'].dt.month
+    # df_count = data.qr_code_df.groupby(['hour']).size().reset_index(name='counts')
+
+
     try:
-        data.refresh_data()
-
-        # korrekte umsetzung
-        data.qr_code_pro_stunde_heute()
-        df_count = data.qr_code_pro_stunde
-
-        # data.qr_code_df['hour'] = data.qr_code_df['Timestamp'].dt.hour
-        # data.qr_code_df['day'] = data.qr_code_df['Timestamp'].dt.day
-        # data.qr_code_df['month'] = data.qr_code_df['Timestamp'].dt.month
-        # df_count = data.qr_code_df.groupby(['hour']).size().reset_index(name='counts')
-
         trace = dict(
             type="bar",
             mode='bar',
@@ -331,7 +333,6 @@ def gen_monthly_qr(interval):
         # korrekte umsetzung
         data.qr_code_pro_stunde_monthly()
         df_count_montly = data.qr_code_pro_month
-        print(df_count_montly)
         sizeref = 2. * max(df_count_montly['counts']) / (2*10)
 
         trace = dict(

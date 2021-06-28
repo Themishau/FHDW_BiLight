@@ -7,14 +7,15 @@ class BI_Data():
     def __init__(self, connection=None):
         self.connection = SQL_Writer()
         self.benefit_df = self.connection.get_df_select_benefits()
-        self.gesch_bene_df = self.connection.get_df_select_geschaefte()
+        self.gesch_bene_df = self.connection.get_df_select_gesch_bene()
         self.qr_code_df = self.connection.get_df_select_qr_code()
         self.bi_light_df = self.connection.get_df_select_bi_light()
         self.qr_code_pro_stunde = None
         self.qr_code_pro_month = None
         self.benefits_pro_day = None
-        self.date = dt.datetime.now().day
-        self.month = dt.datetime.now().month
+        self.now = dt.datetime.now()
+        self.date = self.now.day
+        self.month = self.now.month
         self.refresh_time = self.get_current_time()
         #self.date = 22
         self.weekdaydict = {0:"Montag",
@@ -58,7 +59,7 @@ class BI_Data():
             print('refreshed')
             try:
                 self.benefit_df = self.connection.get_df_select_benefits()
-                self.gesch_bene_df = self.connection.get_df_select_geschaefte()
+                self.gesch_bene_df = self.connection.get_df_select_gesch_bene()
                 self.qr_code_df = self.connection.get_df_select_qr_code()
                 self.bi_light_df = self.connection.get_df_select_bi_light()
                 self.today_data = self.set_today_data()
@@ -68,16 +69,13 @@ class BI_Data():
 
     def qr_code_pro_stunde_heute(self):
         try:
-            # korrekte umsetzung
             now = dt.datetime.now()
             today = now.day
-            #print("Heute ist:" + str(today))
             self.qr_code_df['hour'] = self.qr_code_df['Timestamp'].dt.hour
             self.qr_code_df['day'] = self.qr_code_df['Timestamp'].dt.day
             self.qr_code_df['month'] = self.qr_code_df['Timestamp'].dt.month
             data_day = self.qr_code_df.loc[self.qr_code_df['day'] == self.date]
             self.qr_code_pro_stunde = data_day.groupby(['hour']).size().reset_index(name='counts')
-            #print(self.qr_code_pro_stunde)
         except AssertionError as e:
             print(e)
             print("-------- qr_code_pro_stunde_heute --------")
@@ -87,16 +85,13 @@ class BI_Data():
 
     def qr_code_pro_stunde_monthly(self):
         try:
-            # korrekte umsetzung
             now = dt.datetime.now()
             today = now.day
-            #print("Heute ist:" + str(today))
             self.qr_code_df['hour'] = self.qr_code_df['Timestamp'].dt.hour
             self.qr_code_df['day'] = self.qr_code_df['Timestamp'].dt.day
             self.qr_code_df['month'] = self.qr_code_df['Timestamp'].dt.month
-            #data_month = self.qr_code_df.loc[self.qr_code_df['month'] == self.date]
             self.qr_code_pro_month = self.qr_code_df.groupby(['day']).size().reset_index(name='counts')
-            #print(self.qr_code_pro_stunde)
+
         except AssertionError as e:
             print(e)
             print("-------- qr_code_pro_stunde_monthly --------")
@@ -106,18 +101,13 @@ class BI_Data():
 
     def benefit_heute(self):
         try:
-            # korrekte umsetzung
-            # data.bi_light_df.groupby(['Benefit']).size().reset_index(name='counts').sort_values(by=['counts'], ascending=False)
             now = dt.datetime.now()
             today = now.day
-            #print("Heute ist:" + str(today))
             self.bi_light_df['hour'] = self.bi_light_df['Timestamp'].dt.hour
             self.bi_light_df['day'] = self.bi_light_df['Timestamp'].dt.day
             self.bi_light_df['month'] = self.bi_light_df['Timestamp'].dt.month
             data_day = self.bi_light_df.loc[self.bi_light_df['day'] == self.date]
             self.benefits_pro_day = data_day.groupby(['Benefit','day']).size().reset_index(name='counts').sort_values(by=['counts'], ascending=False)
-            #print(self.benefits_pro_day)
-            #print(self.benefit_pro_day)
         except AssertionError as e:
             print(e)
             print("--------benefit heute --------")
