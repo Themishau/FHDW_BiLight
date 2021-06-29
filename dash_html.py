@@ -6,8 +6,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.exceptions import PreventUpdate
 from dash.dependencies import Input, Output
-from plot_data import BI_Data
-
+from Plot_Data.plot_data import BI_Data
+from BI_Export.ReportWriter import ReportWriter
 # init BI_Data
 data = BI_Data()
 print("BI-Light am {}, {}.{}".format(data.today_data.weekday.values[0], data.today_data.today.values[0], data.today_data.month.values[0]))
@@ -47,6 +47,10 @@ app.layout = html.Div(
                     ],
                     className="app__header__desc",
                 ),
+                html.Div([
+                html.Button('Download BI-Data', id='BI_export_Button'),
+                             dcc.Download(id="download-dataframe-xlsx"),
+                ]),
                 html.Div(
                     [
                         html.Img(
@@ -176,6 +180,17 @@ def get_current_time():
     now = dt.datetime.now()
     total_time = (now.hour * 3600) + (now.minute * 60) + now.second
     return total_time
+
+@app.callback(
+    Output("download-dataframe-xlsx", "data"),
+    Input("BI_export_Button", "n_clicks"),
+    prevent_initial_call=True,
+)
+def download_BI_Data(n_clicks):
+    writer = ReportWriter()
+    data = writer.createDailyReport("")
+
+    return dict(content=data, base64=True, filename=writer.get_filename())
 
 @app.callback(
     Output("qr-code-live", "figure"), [Input("qr-code-update", "n_intervals")]

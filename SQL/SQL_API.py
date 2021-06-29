@@ -426,17 +426,17 @@ class SQL_Writer():
 
 
     def create_connection_pymysql(self):
+        # connection = pymysql.connect(host='localhost',    # change host-ip if needed
+        #                              port=3310,           # change port if needed
+        #                              user='dummy_insert',
+        #                              password='1234',
+        #                              db='RheinBerg_QRCode')
+
         connection = pymysql.connect(host='175.20.0.128',    # change host-ip if needed
                                      port=3306,           # change port if needed
                                      user='dummy_insert',
                                      password='1234',
                                      db='RheinBerg_QRCode')
-
-        # connection = pymysql.connect(host='192.168.137.238',    # change host-ip if needed
-        #                              port=3310,           # change port if needed
-        #                              user='dummy_insert',
-        #                              password='1234',
-        #                              db='RheinBerg_QRCode')
         print('success')
         return connection
 

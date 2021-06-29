@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from dash_fhdw_test import start_app
+from dash_html import start_app
 # from MapBeispiel import start_app1
 
 
